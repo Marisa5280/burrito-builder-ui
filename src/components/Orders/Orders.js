@@ -1,13 +1,13 @@
 import React from "react";
 import "./Orders.css";
 
-const Orders = (props) => {
-  const orderEls = props.orders.map((order) => {
+const Orders = ({orders}) => {
+  const orderEls = orders.map((order) => {
     return (
-      <div className="order">
+      <div className="order"  key={order.id}>
         <h3>{order.name}</h3>
         <ul className="ingredient-list">
-          {order.ingredients.map((ingredient) => {
+          {order.ingredients.map((ingredient, index) => {
             return <li>{ingredient}</li>;
           })}
         </ul>

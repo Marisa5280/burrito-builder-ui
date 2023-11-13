@@ -1,18 +1,38 @@
 import { useState } from "react";
 
-function OrderForm(props) {
+function OrderForm({ orders, setOrders, postNewOrder }) {
   const [name, setName] = useState("");
   const [ingredients, setIngredients] = useState([]);
+  const [errorMsg, setErrorMsg] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
-    clearInputs();
+    if (name && ingredients.length) {
+      const newOrder = {
+        name: name,
+        ingredients: ingredients,
+      };
+      postNewOrder(newOrder);
+      setOrders([...orders, newOrder]);
+      clearInputs();
+      setErrorMsg("");
+    } else {
+      setErrorMsg("Please enter a name and select ingredient(s) to order.");
+    }
   }
 
   function clearInputs() {
     setName("");
     setIngredients([]);
-  };
+  }
+
+  function addIngredient(ingredient) {
+    if (!ingredients.length) {
+      setIngredients([ingredient]);
+    } else if (!ingredients.includes(ingredient)) {
+      setIngredients([...ingredients, ingredient]);
+    }
+  }
 
   const possibleIngredients = [
     "beans",
@@ -28,12 +48,16 @@ function OrderForm(props) {
     "cilantro",
     "sour cream",
   ];
-  const ingredientButtons = possibleIngredients.map((ingredient) => {
+  const ingredientButtons = possibleIngredients.map((ingredient, index) => {
     return (
       <button
-        key={ingredient}
+        key={`${ingredient}-${index}`}
         name={ingredient}
-        // onClick={(e) => }
+        value={ingredient}
+        onClick={(e) => {
+          e.preventDefault();
+          addIngredient(ingredient);
+        }}
       >
         {ingredient}
       </button>
@@ -47,14 +71,18 @@ function OrderForm(props) {
         placeholder="Name"
         name="name"
         value={name}
-        // onChange={(e) => }
+        onChange={(e) => setName(e.target.value)}
       />
 
       {ingredientButtons}
 
       <p>Order: {ingredients.join(", ") || "Nothing selected"}</p>
 
-      <button onClick={(e) => handleSubmit(e)}>Submit Order</button>
+      {errorMsg && <p>{errorMsg}</p>}
+
+      <button className="submit-button" onClick={(e) => handleSubmit(e)}>
+        Submit Order
+      </button>
     </form>
   );
 }
