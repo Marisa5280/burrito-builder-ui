@@ -36,9 +36,10 @@ describe("Burrito Builder", () => {
     });
     cy.get("header").should("contain", "Burrito Builder");
     cy.get("form").get("input").should("have.attr", "placeholder", "Name");
+    cy.get('header').find('p').should('contain', "Order: Nothing selected")
     cy.get(".submit-button").should("contain", "Submit Order");
     cy.get("section").get(".order").should("have.length", 3);
-    cy.get(".order").children().first().contains("h3", "Pat");
+    cy.get(".order").first().find('h3').should("contain", "Pat");
     cy.get(".order")
       .first()
       .find(".ingredient-list")
@@ -51,7 +52,7 @@ describe("Burrito Builder", () => {
       .children()
       .last()
       .should("contain", "jalapeno");
-    cy.get(".order").last().contains("h3", "Alex");
+    cy.get(".order").last().find('h3').should("contain", "Alex");
     cy.get(".order")
       .last()
       .find(".ingredient-list")
@@ -67,13 +68,31 @@ describe("Burrito Builder", () => {
   });
 
   it("can submit a new order", () => {
+    cy.get("section").get(".order").should("have.length", 3);
     cy.get("form").get("input").type("John").should("have.value", "John");
     cy.get('[name="pico de gallo"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo");
     cy.get('[name="beans"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo, beans");
     cy.get('[name="guacamole"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo, beans, guacamole");
     cy.get('[name="steak"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo, beans, guacamole, steak");
     cy.get(".submit-button").click();
     cy.get("section").get(".order").should("have.length", 4);
+    cy.get(".order").first().find('h3').should("contain", "Pat");
+    cy.get(".order")
+      .first()
+      .find(".ingredient-list")
+      .children()
+      .first()
+      .should("contain", "beans");
+    cy.get(".order")
+      .first()
+      .find(".ingredient-list")
+      .children()
+      .last()
+      .should("contain", "jalapeno");
     cy.get(".order").last().contains("h3", "John");
     cy.get(".order")
       .last()
@@ -89,8 +108,40 @@ describe("Burrito Builder", () => {
       .should("contain", "steak");
   });
 
-  it("will not submit an order with missing information", () => {
+// SAD PATH / ERROR TESTING 
+
+  it("will not submit an order with missing ingredient information", () => {
+    cy.get("section").get(".order").should("have.length", 3);
     cy.get("form").get("input").type("John").should("have.value", "John");
+    cy.get("p").should("contain", "Order: Nothing selected");
+    cy.get(".submit-button").click();
+    cy.get("p").should(
+      "contain",
+      "Please enter a name and select ingredient(s) to order."
+    );
+    cy.get("section").get(".order").should("not.have.length", 4);
+  });
+
+  it("will not submit an order with missing name information", () => {
+    cy.get("section").get(".order").should("have.length", 3);
+    cy.get('[name="pico de gallo"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo");
+    cy.get('[name="beans"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo, beans");
+    cy.get('[name="guacamole"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo, beans, guacamole");
+    cy.get('[name="steak"]').click();
+    cy.get("p").should("contain", "Order: pico de gallo, beans, guacamole, steak");
+    cy.get(".submit-button").click();
+    cy.get("p").should(
+      "contain",
+      "Please enter a name and select ingredient(s) to order."
+    );
+    cy.get("section").get(".order").should("not.have.length", 4);
+  });
+
+  it("will not submit an order with missing order information", () => {
+    cy.get("section").get(".order").should("have.length", 3);
     cy.get("p").should("contain", "Order: Nothing selected");
     cy.get(".submit-button").click();
     cy.get("p").should(
